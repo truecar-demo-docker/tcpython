@@ -1,0 +1,7 @@
+steps:
+  - label: ':docker: TcPython'
+    plugins:
+      - seek-oss/docker-ecr-publish#v1.2.0:
+          ecr-name: tcpython
+          tags:
+            - 3.6.8
