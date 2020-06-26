@@ -13,6 +13,7 @@ RUN \
     make \
     unzip \
     zip \
+    gnupg \
   && LC_ALL=C apt-get -t stretch-backports install -yqq --no-install-recommends \
     git \
   && useradd \
