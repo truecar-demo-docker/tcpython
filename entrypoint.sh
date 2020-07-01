@@ -2,6 +2,8 @@
 
 export PATH=/var/cache/venv/bin:${PATH}
 
+export TWINE_REPOSITORY_URL="https://artifactory.corp.tc/artifactory/api/pypi/tc-pypi"
+
 die() { echo "$*" && exit 1; }
 
 ispydatajob() {
@@ -25,6 +27,11 @@ pypackage_upload() {
   s3pypi --force --no-sdist --private --secret packages \
     --bucket "${S3_BUCKET}" ||
     die "Failed to publish package: $(pypackagename)"
+  [[ -z "${ARTIFACTORY_USER}" || -z "${ARTIFACTORY_PASSWORD}" ]] && return 0
+  twine upload \
+    --username="${ARTIFACTORY_USER}" \
+    --password="${ARTIFACTORY_PASSWORD}" \
+    ./dist/*.whl
 }
 
 pydatajob_upload() {

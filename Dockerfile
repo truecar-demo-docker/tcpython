@@ -45,6 +45,7 @@ RUN python -m venv /var/cache/venv && /usr/local/bin/entrypoint.sh \
       awscli \
       s3pypi \
       setuptools \
+      twine \
       git+https://git.corp.tc/python/tcpysetup@master \
       git+https://git.corp.tc/python/tcpylib@master \
       ${PRECACHEPKGS}
