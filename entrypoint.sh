@@ -4,6 +4,8 @@ export PATH=/var/cache/venv/bin:${PATH}
 
 export TWINE_REPOSITORY_URL="https://artifactory.corp.tc/artifactory/api/pypi/tc-pypi"
 
+readonly ARTIFACTORY_URL="https://artifactory.corp.tc/artifactory/misc-static/tcpython"
+
 die() { echo "$*" && exit 1; }
 
 ispydatajob() {
@@ -23,10 +25,6 @@ pypackage_upload() {
     echo "Skipping upload for non-master branch!"
     return
   fi
-  # --secret is just a prefix added to the object path
-  s3pypi --force --no-sdist --private --secret packages \
-    --bucket "${S3_BUCKET}" ||
-    die "Failed to publish package: $(pypackagename)"
   [[ -z "${ARTIFACTORY_USER}" || -z "${ARTIFACTORY_PASSWORD}" ]] && return 0
   twine upload \
     --username="${ARTIFACTORY_USER}" \
@@ -45,9 +43,15 @@ pydatajob_upload() {
 
   (make EXTRA_INDEX_URL="https://${EXTRA_INDEX_CREDENTIALS}@pypi.build.true.sh" &&
     [[ -s "${name}.zip" ]]) || die "Failed to create ${name}.zip"
-  aws s3 cp "${name}.zip" \
-    "s3://${S3_BUCKET}/datajobs/${name}/${target}.zip" ||
-    die "Failed to copy ${name}.zip to s3://${S3_BUCKET}/datajobs/"
+
+  [[ -n "${ARTIFACTORY_USER}" && -n "${ARTIFACTORY_PASSWORD}" ]] ||
+    die "Missing Artifactory credentials!"
+
+  curl -sSf -u "${ARTIFACTORY_USER}:${ARTIFACTORY_PASSWORD}" \
+    -X PUT \
+    -T "${name}.zip" \
+    "${ARTIFACTORY_URL}/${name}/${target}.zip" ||
+      die "Failed to upload ${name}.zip to Artifactory"
 }
 
 build() {
@@ -59,8 +63,6 @@ build() {
 }
 
 run() {
-  local DATA_JOB_URL="https://${EXTRA_INDEX_CREDENTIALS}@datajobs.build.true.sh"
-
   package=$1 && shift
   version=$1 && shift
 
@@ -68,7 +70,7 @@ run() {
   [[ -n ${version} ]] || die "Missing version!"
 
   curl -sSL -o package.zip \
-    "${DATA_JOB_URL}/${package}/${package}-${version}.zip" &&
+    "${ARTIFACTORY_URL}/${package}/${package}-${version}.zip" &&
     unzip -qq package.zip &&
     # show version
     python3 -m "${package}" --version
