@@ -2,7 +2,7 @@ FROM python:3.6.8-slim
 
 ARG USER=python
 ARG UID=999
-ARG PRECACHEPKGS="boto3 numpy pandas"
+ARG PRECACHEPKGS="boto3==1.14.14 numpy==1.19.0 pandas==1.0.5"
 
 RUN \
   echo "deb http://deb.debian.org/debian stretch-backports main" \
@@ -39,11 +39,10 @@ WORKDIR /app
 # entrypoint activates virtual environment
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 
-RUN python -m venv /var/cache/venv && /usr/local/bin/entrypoint.sh \
-    pip install --upgrade \
-      pip \
-      awscli \
-      s3pypi \
+RUN python -m venv /var/cache/venv && \
+    /usr/local/bin/entrypoint.sh python -m pip install --upgrade pip && \
+    /usr/local/bin/entrypoint.sh python -m pip install \
+      awscli==1.18.91 \
       setuptools \
       twine \
       git+https://git.corp.tc/python/tcpysetup@master \
