@@ -41,7 +41,7 @@ pydatajob_upload() {
   [[ "${PREPEND_BRANCH_TO_FILENAME:-true}" == true && "${branch}" != "master" ]] &&
     target="${name}-${branch}-${version}"
 
-  (make EXTRA_INDEX_URL="https://${EXTRA_INDEX_CREDENTIALS}@pypi.build.true.sh" &&
+  (make EXTRA_INDEX_URL="https://artifactory.corp.tc/artifactory/api/pypi/tc-pypi/simple" &&
     [[ -s "${name}.zip" ]]) || die "Failed to create ${name}.zip"
 
   [[ -n "${ARTIFACTORY_USER}" && -n "${ARTIFACTORY_PASSWORD}" ]] ||
