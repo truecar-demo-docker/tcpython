@@ -4,4 +4,4 @@ steps:
       - seek-oss/docker-ecr-publish#v1.2.0:
           ecr-name: tcpython
           tags:
-            - 3.6.8
+            - 3.9.10
