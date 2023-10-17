@@ -1,11 +1,11 @@
-FROM python:3.7.12-slim
+FROM python:3.7.12-slim-bullseye
 
 ARG USER=python
 ARG UID=999
 ARG PRECACHEPKGS="boto3==1.14.14 numpy==1.19.0 pandas==1.0.5"
 
 RUN \
-  echo "deb http://deb.debian.org/debian stretch-backports main" \
+  echo "deb http://deb.debian.org/debian bullseye-backports main" \
     > /etc/apt/sources.list.d/backports.list \
   && LC_ALL=C apt-get update -yqq && LC_ALL=C apt-get dist-upgrade -yqq \
   && LC_ALL=C apt-get install -yqq --no-install-recommends \
@@ -14,7 +14,7 @@ RUN \
     unzip \
     zip \
     gnupg \
-  && LC_ALL=C apt-get -t stretch-backports install -yqq --no-install-recommends \
+  && LC_ALL=C apt-get -t bullseye-backports install -yqq --no-install-recommends \
     git \
   && useradd \
     --create-home \
